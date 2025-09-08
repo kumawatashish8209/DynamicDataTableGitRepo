@@ -6,6 +6,7 @@
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
+    <!-- Search for an object -->
     <lightning-combobox
         name="myObjects"
         value={selectedValue}
@@ -13,4 +14,20 @@
         onchange={handleChangeSelectedObject}
         placeholder="Select an object"
     ></lightning-combobox>
+
+    <!-- Table of selected record -->
+    <template if:true={tableVisibility}>
+        <div class="slds-m-around_medium">
+            <lightning-datatable    
+                key-field="Id"
+                data={records}
+                columns={columns} 
+                onsave={handleSave} 
+                draft-values={drafvals} 
+                onrowaction={handleRowAction}
+                show-row-number-column>
+            </lightning-datatable>
+        </div>
+    </template>
+    
 </template>

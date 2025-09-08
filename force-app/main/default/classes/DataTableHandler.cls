@@ -18,4 +18,9 @@ public class DataTableHandler {
 
         return apiToObj;
     }
+
+    @AuraEnabled(cacheable = true)
+    public static List<Object> getRecords(String objectName) {
+        return Database.query('select fields(all) from ' + objectName + ' limit 200');
+    }
 }
