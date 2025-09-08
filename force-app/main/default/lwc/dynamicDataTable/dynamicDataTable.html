@@ -6,5 +6,12 @@
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
-    
+    <lightning-combobox
+        name="myObjects"
+        label="Select an Object"
+        value={selectedValue}
+        options={options}
+        onchange={handleChange}
+        placeholder="Select an object"
+    ></lightning-combobox>
 </template>
