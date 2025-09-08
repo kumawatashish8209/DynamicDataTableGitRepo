@@ -8,13 +8,14 @@
 public class DataTableHandler {
     //search list objects 
     @AuraEnabled
-    public static List<String> getListOfObjects() {
-        List<String> objectNames = new List<String>();
+    public static Map<String, String> getListOfObjects() {
+        Map<String, String> apiToObj = new Map<String, String>();
         Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe();
+
         for(Schema.SObjectType obj : gd.values()) {
-            objectNames.add(obj.getDescribe().getName());
+            apiToObj.put(obj.getDescribe().getName(), obj.getDescribe().getLabel());
         }
-        objectNames.sort();
-        return objectNames;
+
+        return apiToObj;
     }
 }

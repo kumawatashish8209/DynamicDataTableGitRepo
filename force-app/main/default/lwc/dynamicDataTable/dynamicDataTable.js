@@ -4,16 +4,23 @@ import getListOfObjects from '@salesforce/apex/DataTableHandler.getListOfObjects
 export default class DynamicDataTable extends LightningElement {
     @track selectedValue = '';
     @track options = [];
+    @track records = [];
+    apiToObj = {};
 
     
     connectedCallback() {
+        //get all objects from org
         getListOfObjects()
         .then(result => {
-            if (Array.isArray(result)) {
-                this.options = result.map(obj => ({ label: obj, value: obj }));  // format the options
-            } else {
-                this.options = [];
-            }
+            this.apiToObj = result;
+            this.options = Object.entries(this.apiToObj)
+                     .map(([key, value]) => ({ label: value, value: key }))
+                     .sort((a, b) => {
+                         // Compare labels alphabetically
+                         if(a.label < b.label) return -1;
+                         if(a.label > b.label) return 1;
+                         return 0;
+                     });
         })
         .catch(error => {
             this.options = [];
@@ -21,7 +28,7 @@ export default class DynamicDataTable extends LightningElement {
         } );
     }
 
-    handleChange(event) {
+    handleChangeSelectedObject(event) {            //handle event when object is selected
         this.selectedValue = event.detail.value;
     }
 }
