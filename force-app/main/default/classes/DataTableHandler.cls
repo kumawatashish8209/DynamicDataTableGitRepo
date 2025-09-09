@@ -40,4 +40,25 @@ public class DataTableHandler {
         return Database.query('SELECT ' + String.join(fields, ',') + ' FROM ' + objectApiName);
     }
 
+    @AuraEnabled
+    public static String updateFields(List<SObject> sobjList) {
+        //System.debug(sobjList);
+        Database.SaveResult[] res = Database.update(sobjList, false);
+        //System.debug(res);
+        List<String> errList = new List<String>();
+        for(Database.SaveResult sr : res) {
+            if(!sr.isSuccess()) {
+                errList.add(sr.getId());
+            }
+        }
+
+        if(!errList.isEmpty()) {
+            //System.debug('errors : '+errList);
+            return errList.toString();
+        }
+        else {
+            return 'Success';
+        }
+    }
+
 }

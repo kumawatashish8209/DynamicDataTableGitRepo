@@ -1,7 +1,10 @@
 import { LightningElement, track} from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+
 import getListOfObjects from '@salesforce/apex/DataTableHandler.getListOfObjects';
 import getFields from '@salesforce/apex/DataTableHandler.getFields';
 import getData from '@salesforce/apex/DataTableHandler.getData';
+import updateFields from '@salesforce/apex/DataTableHandler.updateFields';
 
 export default class DynamicDataTable extends LightningElement {
     @track selectedValue;
@@ -11,9 +14,9 @@ export default class DynamicDataTable extends LightningElement {
     @track drafvals = [];
     @track fieldsOptions = [];
     @track selectedFields = [];
-    @track visibleFields = [];
     @track fieldsVisibility = false;
     @track tableVisibility = false;
+    @track isLoading = false;
     error;
 
     
@@ -84,7 +87,7 @@ export default class DynamicDataTable extends LightningElement {
             return {
                 label: this.fieldsOptions.find(f => f.value === field).label,       
                 fieldName: field,
-                editable: fieldName == 'Name' ? true : false       
+                editable: fieldName != 'Id' ? true : false       
             };
         });
     }
@@ -98,6 +101,26 @@ export default class DynamicDataTable extends LightningElement {
             this.records = [];
             this.showToast('Error getting data', error.body.message, 'error')
         });
+    }
+
+    //save button functionality while inline edit
+    handleSave(event){
+        this.isLoading = true;
+
+        this.drafvals = event.detail.draftValues;
+        updateFields({sobjList :this.drafvals})
+        .then (result => {
+            if(result == "Success")
+                this.showToast('Success', 'Records Updated Successfully!', 'success');
+            else
+                this.showToast('Error', 'These records are not Updated : '+result, 'error');
+            this.loadData();
+            this.isLoading = false;
+        })
+        .catch(error => {
+            this.showNotification('Error updating records', error.body.message, 'error');
+        });
+        this.drafvals = [];
     }
 
 }

@@ -6,6 +6,9 @@
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
+    <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+    </template>
     <!-- Search for an object -->
     <lightning-combobox
         name="myObjects"
@@ -47,8 +50,8 @@
                 key-field="Id"
                 data={records}
                 columns={columns} 
+                onsave={handleSave} 
                 draft-values={drafvals} 
-                onrowaction={handleRowAction}
                 show-row-number-column>
             </lightning-datatable>
         </div>
