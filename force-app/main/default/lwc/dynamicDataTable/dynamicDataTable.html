@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 09-08-2025
+  @last modified on  : 09-09-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -10,19 +10,43 @@
     <lightning-combobox
         name="myObjects"
         value={selectedValue}
-        options={options}
+        options={objectOptions}
         onchange={handleChangeSelectedObject}
         placeholder="Select an object"
     ></lightning-combobox>
 
-    <!-- Table of selected record -->
+    <!-- fields selection -->
+    <template if:true={fieldsVisibility}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-dual-listbox name="fields"
+                        label="Select fields"
+                        source-label="Available"
+                        selected-label="Selected"
+                        field-level-help="Select your preferred fields"
+                        options={fieldsOptions}
+                        onchange={handleChangeDualList}>
+                    </lightning-dual-listbox>
+                </div>
+                
+                <footer class="slds-modal__footer slds-grid slds-grid_align-spread">
+                    <lightning-button variant="brand" type="submit" label="Load Data" onclick={handleLoad}></lightning-button>
+                    <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Data Table of selected object -->
     <template if:true={tableVisibility}>
         <div class="slds-m-around_medium">
             <lightning-datatable    
                 key-field="Id"
                 data={records}
                 columns={columns} 
-                onsave={handleSave} 
                 draft-values={drafvals} 
                 onrowaction={handleRowAction}
                 show-row-number-column>
