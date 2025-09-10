@@ -14,14 +14,17 @@ export default class DynamicDataTable extends LightningElement {
     @track drafvals = [];
     @track fieldsOptions = [];
     @track selectedFields = [];
+    @track showedData = [];
     @track fieldsVisibility = false;
     @track tableVisibility = false;
     @track isLoading = false;
+    count = 0;
     error;
 
     
     connectedCallback() {
         //get all objects from org
+        this.isLoading = true;
         getListOfObjects()
         .then(result => {
             let apiToObj = result;
@@ -39,32 +42,32 @@ export default class DynamicDataTable extends LightningElement {
             this.objectOptions = [];
             this.showToast('Error getting objects', error.body.message, 'error');
             //console.log('Error while getting all objects: ' + error);
-        } );
+        } ).finally(() => {
+            this.isLoading = false;
+        });
     }
 
-    handleChangeSelectedObject(event) {            //handle event when object is selected
+    //            <<<<Search for an object>>>>>
+    // handle when user reselects a selected object
+    handleFocus() {
+        if(this.count == 1) {
+            this.fieldsVisibility = true;
+            this.count = 0;
+        }else {
+            this.count++;
+        }
+    }
+
+    // handle event when object is selected or changed
+    handleChangeSelectedObject(event) {        
         this.selectedValue = event.detail.value;
         this.getObjectFields();
         this.fieldsVisibility = true;
     }
 
-    handleCancel() {
-        this.fieldsVisibility = false;
-    }
-
-    handleLoad() {
-        this.setColoumns(this.selectedFields);
-        this.loadData();
-        this.handleCancel();
-        this.tableVisibility = true;
-    }
-
-    handleChangeDualList(event) {
-        this.selectedFields = event.detail.value;
-        //console.log('handleChangeDualList: ' + JSON.stringify(this.selectedFields));
-    }
-
+    // imperative call to apex method to get fields of selected object
     getObjectFields() {
+        this.isLoading = true;
         getFields({objectApiName: this.selectedValue})
         .then(result => {
             this.fieldsOptions = result;
@@ -74,53 +77,101 @@ export default class DynamicDataTable extends LightningElement {
             this.fieldsOptions = [];
             this.showToast('Error getting fields', error.body.message, 'error');        
         })
+        .finally(() => {
+            this.isLoading = false;
+        });
     }
 
-    showToast(title, message, variant) {
-        this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
+
+    //           <<<<<<fields selection>>>>>>
+    handleChangeDualList(event) {
+        this.selectedFields = event.detail.value;
+        //console.log('handleChangeDualList: ' + JSON.stringify(this.selectedFields));
     }
 
+    // handle event when user clicks LoadData button
+    handleLoad() {
+        this.setColoumns(this.selectedFields);
+        this.loadData();
+        this.handleCancel();
+        this.tableVisibility = true;
+    }
+
+    // handle event when user clicks cancel button
+    handleCancel() {
+        this.fieldsVisibility = false;
+    }
+
+    // set columns according to selected fields
     setColoumns (fields) {
         this.columns = fields.map(field => {
             //console.log('Mapping label: ' + field.label + ' value: ' + field.value);
-            let fieldName = field;
             return {
                 label: this.fieldsOptions.find(f => f.value === field).label,       
                 fieldName: field,
-                editable: fieldName != 'Id' ? true : false       
+                editable: this.fieldsOptions.find(f => f.value === field).editable === 'false' ? false : true       
             };
         });
     }
 
+    // load data from org according to selected fields
     loadData() {
+        if(this.selectedFields.length == 0) {
+            this.showToast('No fields selected!', 'Please select at least one field', 'warning');
+            return;
+        }
+        this.isLoading = true;
         getData({fields: this.selectedFields, objectApiName: this.selectedValue})
         .then(result => {
             this.records = result;
+            this.showedData = this.records.slice(0, 20);
+            if(this.records.length == 0) {
+                this.showToast('No records found!', 'No records found for the selected object', 'warning');
+            }
         }) 
         .catch(error => {
             this.records = [];
             this.showToast('Error getting data', error.body.message, 'error')
+        })
+        .finally(() => {
+            this.isLoading = false;
         });
     }
 
-    //save button functionality while inline edit
+    //            <<<<<<Data Table of selected object>>>>>>
+    // handle event when user clicks save button then update records in org
     handleSave(event){
         this.isLoading = true;
-
         this.drafvals = event.detail.draftValues;
         updateFields({sobjList :this.drafvals})
         .then (result => {
             if(result == "Success")
                 this.showToast('Success', 'Records Updated Successfully!', 'success');
             else
-                this.showToast('Error', 'These records are not Updated : '+result, 'error');
+                this.showToast('Error', 'Records are not Updated properly because: '+result, 'error');
             this.loadData();
             this.isLoading = false;
         })
         .catch(error => {
             this.showNotification('Error updating records', error.body.message, 'error');
+        })
+        .finally(() => {
+            this.isLoading = false;
+            this.drafvals = [];   // clear after everything
         });
-        this.drafvals = [];
+    }
+
+    // handle event when user scrolls to the end of the table
+    handleLoadMore() {
+        console.log('handleLoadMore called');
+        this.isLoading = true;
+        this.showedData = this.records.slice(0, this.showedData.length + 20);
+        this.isLoading = false;
+    }
+
+    // Toast event handling
+    showToast(title, message, variant) {
+        this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
     }
 
 }

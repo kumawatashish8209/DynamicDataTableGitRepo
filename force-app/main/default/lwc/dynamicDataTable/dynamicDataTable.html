@@ -2,18 +2,19 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 09-09-2025
+  @last modified on  : 09-10-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
     <template if:true={isLoading}>
         <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
     </template>
-    <!-- Search for an object -->
+    <!-- Search for an  object -->
     <lightning-combobox
         name="myObjects"
         value={selectedValue}
         options={objectOptions}
+        onfocus={handleFocus}
         onchange={handleChangeSelectedObject}
         placeholder="Select an object"
     ></lightning-combobox>
@@ -30,13 +31,14 @@
                         selected-label="Selected"
                         field-level-help="Select your preferred fields"
                         options={fieldsOptions}
+                        value={selectedFields}
                         onchange={handleChangeDualList}>
                     </lightning-dual-listbox>
                 </div>
                 
                 <footer class="slds-modal__footer slds-grid slds-grid_align-spread">
-                    <lightning-button variant="brand" type="submit" label="Load Data" onclick={handleLoad}></lightning-button>
                     <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+                    <lightning-button variant="brand" type="submit" label="Load Data" onclick={handleLoad}></lightning-button>
                 </footer>
             </div>
         </section>
@@ -45,14 +47,16 @@
 
     <!-- Data Table of selected object -->
     <template if:true={tableVisibility}>
-        <div class="slds-m-around_medium">
+        <div class="slds-m-around_medium " style="height:410px;">
             <lightning-datatable    
                 key-field="Id"
-                data={records}
+                data={showedData}
                 columns={columns} 
                 onsave={handleSave} 
                 draft-values={drafvals} 
-                show-row-number-column>
+                onloadmore={handleLoadMore}
+                show-row-number-column
+                enable-infinite-loading>
             </lightning-datatable>
         </div>
     </template>
