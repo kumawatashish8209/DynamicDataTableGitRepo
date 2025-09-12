@@ -63,6 +63,7 @@ export default class DynamicDataTable extends LightningElement {
         this.selectedValue = event.detail.value;
         this.getObjectFields();
         this.fieldsVisibility = true;
+        this.drafvals = [];
     }
 
     // imperative call to apex method to get fields of selected object
@@ -70,7 +71,7 @@ export default class DynamicDataTable extends LightningElement {
         this.isLoading = true;
         getFields({objectApiName: this.selectedValue})
         .then(result => {
-            this.fieldsOptions = result;
+            this.fieldsOptions = result.sort((a, b) => a.label.localeCompare(b.label));;
             //console.log('fieldsOptions: ' + JSON.stringify(this.fieldsOptions));
         })
         .catch(error => {
