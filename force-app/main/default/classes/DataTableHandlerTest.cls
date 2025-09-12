@@ -34,9 +34,17 @@ private class DataTableHandlerTest {
     
     @isTest
     static void getFieldsTest_negative() {
-        String objApiName = '';
-        List<Map<String, String>> res2 = DataTableHandler.getFields(objApiName);
-        System.Assert.areEqual(true, true, 'List of Map : '+res2);
+        Boolean excThrow = false;
+        try{
+            String objApiName = '';
+            List<Map<String, String>> res2 = DataTableHandler.getFields(objApiName);
+            System.Assert.areEqual(excThrow, true, 'List of Map : '+res2);
+        }
+        catch(Exception e){
+            excThrow = true;
+            Assert.areEqual(excThrow, true, e.getMessage());
+        }
+        
     }
     
     @isTest
@@ -49,11 +57,17 @@ private class DataTableHandlerTest {
     
     @isTest
     static void getDataTest_negative() {
-        //negative
-        String objApiName = '';
-        List<String> fields = new List<String>{'Id', 'Name', 'createdDate', 'Active__c', 'Description'};
-        List<SObject> lst = DataTableHandler.getData(fields, objApiName);
-        System.Assert.areEqual(10, lst.size(), 'Msg : '+lst);
+        Boolean excThrow = false;
+        try{
+            String objApiName = '';
+            List<String> fields = new List<String>{'Id', 'Name', 'createdDate', 'Active__c', 'Description'};
+            List<SObject> lst = DataTableHandler.getData(fields, objApiName);
+            System.Assert.areEqual(excThrow, true, 'Msg : '+lst);
+        }catch(Exception e){
+            excThrow = true;
+            System.Assert.areEqual(excThrow, true, 'Msg : '+e.getMessage());
+        }
+        
     }
     
     @isTest
@@ -77,10 +91,11 @@ private class DataTableHandlerTest {
             acc.Active__c = 'No';
         }
         
-        lst.add(new Account(name='Test'));
+        lst.add(new Account());
         String s2 = DataTableHandler.updateFields(lst);
         List<Account> res2 = [select id, name, description, Active__c from Account];
-        Assert.areEqual('Success', s2, 'Msg : '+res2);
+        Assert.areEqual(true,s2 != 'Success', 'Msg : '+res2);
+        
     }
     
 }

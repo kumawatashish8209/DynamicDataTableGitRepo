@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 09-11-2025
+ * @last modified on  : 09-12-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class DataTableHandler {
@@ -10,17 +10,12 @@ public with sharing class DataTableHandler {
     @AuraEnabled
     public static Map<String, String> getListOfObjects() {
         Map<String, String> apiToObj = new Map<String, String>();
-        try {
-            Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe();
-
-            for(Schema.SObjectType obj : gd.values()) {
-                if(obj.getDescribe().isAccessible()){
-                    apiToObj.put(obj.getDescribe().getLabel(), obj.getDescribe().getName());
-                }
+        Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe();
+        
+        for(Schema.SObjectType obj : gd.values()) {
+            if(obj.getDescribe().isAccessible()){
+                apiToObj.put(obj.getDescribe().getLabel(), obj.getDescribe().getName());
             }
-
-        } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
         }
 
         return apiToObj;
@@ -62,26 +57,22 @@ public with sharing class DataTableHandler {
 
     @AuraEnabled
     public static String updateFields(List<SObject> sobjList) {
-        try {
-            Database.SaveResult[] res = Database.update(sobjList, false);
-            List<String> errList = new List<String>();
-            for(Database.SaveResult sr : res) {
-                if(!sr.isSuccess()){
-                    for(Database.Error err : sr.getErrors()){
-                        errList.add(err.getMessage());
-                    }
-                }
-                
-            }
-            if(errList.size() > 0) {
-                return String.join(errList, ' , ');
-            }else {
-                return 'Success';
-            }
-        } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
-        }
         
+        Database.SaveResult[] res = Database.update(sobjList, false);
+        List<String> errList = new List<String>();
+        for(Database.SaveResult sr : res) {
+            if(!sr.isSuccess()){
+                for(Database.Error err : sr.getErrors()){
+                    errList.add(err.getMessage());
+                }
+            }
+            
+        }
+        if(errList.size() > 0) {
+            return String.join(errList, ' , ');
+        }else {
+            return 'Success';
+        }
     }
 
 }

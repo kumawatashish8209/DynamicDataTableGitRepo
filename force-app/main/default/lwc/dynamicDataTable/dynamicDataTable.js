@@ -61,6 +61,7 @@ export default class DynamicDataTable extends LightningElement {
     // handle event when object is selected or changed
     handleChangeSelectedObject(event) {        
         this.selectedValue = event.detail.value;
+        this.selectedFields = [];
         this.getObjectFields();
         this.fieldsVisibility = true;
         this.drafvals = [];
